@@ -16,8 +16,7 @@ import (
 func TestFeatures(t *testing.T) {
 	s := gobdd.NewSuite(t, gobdd.WithBeforeScenario(func(ctx context.Context) {
 	}))
-	s.AddStep(`Call the user api`, callapi)
-	s.AddStep(`Satus code should be Ok`, verify_satus)
+	s.AddStep(`Call the user api and verify the Status code should be Ok`, callapi)
 	s.Run()
 }
 
@@ -28,21 +27,12 @@ func callapi(t gobdd.TestingT, ctx context.Context) context.Context {
 		os.Exit(1)
 	}
 	responseData, err := ioutil.ReadAll(response.Body)
-	ctx.Set("response", responseData)
+	fmt.Println(string(responseData))
 	if err != nil {
 		log.Fatal(err)
 	}
-	// fmt.Println(string(responseData))
-	response.StatusCode = 200
-	return ctx
-}
-
-func verify_satus(t gobdd.TestingT, ctx context.Context) context.Context {
-	response, err := ctx.Get("response")
-	fmt.Println(response)
 	assert.Equal(t, http.StatusOK, response.StatusCode)
-	if err != nil {
-		t.Error(err)
-	}
+	assert.Equal(t, 200, response.StatusCode)
+	assert.NotNil(t, response.Body)
 	return ctx
 }
