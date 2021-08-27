@@ -23,7 +23,7 @@ func TestUpdateUser(t *testing.T) {
 }
 
 func call_update_user_api(t gobdd.TestingT, ctx context.Context) context.Context {
-	jsonData := UpdateUserData{Name: "Luis", Job: "Team Leader"}
+	jsonData := map[string]string{"name": "Luis", "job": "Team Leader"}
 	jsonValue, _ := json.Marshal(jsonData)
 
 	request, _ := http.NewRequest(http.MethodPut, "https://reqres.in/api/users/5", bytes.NewBuffer(jsonValue))
