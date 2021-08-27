@@ -17,28 +17,46 @@ import (
 func TestFeatures(t *testing.T) {
 	s := gobdd.NewSuite(t, gobdd.WithBeforeScenario(func(ctx context.Context) {
 	}))
-	s.AddStep(`Call the user api and verify the Status code should be Ok`, callapi)
+	s.AddStep(`Call the user api`, call_api)
+	s.AddStep(`Validate the response body`, validate_response)
 	s.Run()
 }
 
-func callapi(t gobdd.TestingT, ctx context.Context) context.Context {
+func call_api(t gobdd.TestingT, ctx context.Context) context.Context {
 	response, err := http.Get("https://reqres.in/api/users")
 	if err != nil {
 		fmt.Print(err.Error())
 		os.Exit(1)
 	}
 	responseData, err := ioutil.ReadAll(response.Body)
-	fmt.Println(string(responseData))
+	res := string(responseData)
+
+	fmt.Println(res)
+
+	ctx.Set("response", res)
 	if err != nil {
 		log.Fatal(err)
 	}
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 	assert.Equal(t, 200, response.StatusCode)
 	assert.NotNil(t, response.Body)
+	return ctx
+}
+func validate_response(t gobdd.TestingT, ctx context.Context) context.Context {
+	response, err := ctx.Get("response")
+	if err != nil {
+		t.Error(err)
+	}
+	//Convert the interface into string
+	var x interface{} = response
+	str := fmt.Sprintf("%v", x)
+
+	//Convert the string into bytes
+	data := []byte(str)
 
 	//Validate the response Body
 	var responseObject Response
-	json.Unmarshal(responseData, &responseObject)
+	json.Unmarshal(data, &responseObject)
 	assert.Equal(t, responseObject.Page, 1)
 	assert.Equal(t, responseObject.Per_page, 6)
 	assert.Equal(t, responseObject.Total, 12)
@@ -47,7 +65,6 @@ func callapi(t gobdd.TestingT, ctx context.Context) context.Context {
 	//read the user data
 	for i := 0; i < len(responseObject.User); i++ {
 		fmt.Println(responseObject.User[i].Id)
-		fmt.Println(responseObject.User[i].email)
 		fmt.Println(responseObject.User[i].First_Name)
 		fmt.Println(responseObject.User[i].Last_Name)
 	}
@@ -64,8 +81,6 @@ type Response struct {
 
 type User struct {
 	Id         int    `json:"id"`
-	email      string `json:"email"`
 	First_Name string `json:"first_name"`
 	Last_Name  string `json:"last_name"`
-	Avatar     string `json:"avatar"`
 }

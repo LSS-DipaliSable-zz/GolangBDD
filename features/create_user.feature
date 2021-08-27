@@ -1,3 +1,4 @@
 Feature: Create User
     Scenario: create a user
-        When Call the create user api and verify the status code will be OK
+        When Call the create user api
+        Then Validate created user response body
