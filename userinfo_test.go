@@ -33,34 +33,39 @@ func call_api(t gobdd.TestingT, ctx context.Context) context.Context {
 	fmt.Println(res)
 
 	ctx.Set("response", res)
+
 	if err != nil {
 		log.Fatal(err)
 	}
 	assert.Equal(t, http.StatusOK, response.StatusCode)
-	assert.Equal(t, "200 OK", response.Status)
+	assert.Equal(t, 200, response.StatusCode)
+	assert.NotNil(t, response.Body)
 	return ctx
 }
 
 func validate_response(t gobdd.TestingT, ctx context.Context) context.Context {
 	response, err := ctx.Get("response")
-	fmt.Println(response)
 
-	responseObject := `{"page":1,"per_page":6,"total":12,"total_pages":2,"data":[{"id":1,"email":"george.bluth@reqres.in","first_name":"George","last_name":"Bluth","avatar":"https://reqres.in/img/faces/1-image.jpg"},{"id":2,"email":"janet.weaver@reqres.in","first_name":"Janet","last_name":"Weaver","avatar":"https://reqres.in/img/faces/2-image.jpg"},{"id":3,"email":"emma.wong@reqres.in","first_name":"Emma","last_name":"Wong","avatar":"https://reqres.in/img/faces/3-image.jpg"},{"id":4,"email":"eve.holt@reqres.in","first_name":"Eve","last_name":"Holt","avatar":"https://reqres.in/img/faces/4-image.jpg"},{"id":5,"email":"charles.morris@reqres.in","first_name":"Charles","last_name":"Morris","avatar":"https://reqres.in/img/faces/5-image.jpg"},{"id":6,"email":"tracey.ramos@reqres.in","first_name":"Tracey","last_name":"Ramos","avatar":"https://reqres.in/img/faces/6-image.jpg"}],"support":{"url":"https://reqres.in/#support-heading","text":"To keep ReqRes free, contributions towards server costs are appreciated!"}}`
-	responseBytes := []byte(responseObject)
+	//Convert the interface into string
+	var x interface{} = response
+	str := fmt.Sprintf("%v", x)
 
-	var res ResponseData
+	//Convert the string into bytes
+	data := []byte(str)
 
-	json.Unmarshal(responseBytes, &res)
-	assert.Equal(t, res.Page, 1)
-	assert.Equal(t, res.Per_page, 6)
-	assert.Equal(t, res.Total, 12)
-	assert.Equal(t, res.Total_pages, 2)
+	var responseObject ResponseData
+	json.Unmarshal(data, &responseObject)
+
+	assert.Equal(t, responseObject.Page, 1)
+	assert.Equal(t, responseObject.Per_page, 6)
+	assert.Equal(t, responseObject.Total, 12)
+	assert.Equal(t, responseObject.Total_pages, 2)
 
 	//read the user data
-	for i := 0; i < len(res.User); i++ {
-		fmt.Println(res.User[i].Id)
-		fmt.Println(res.User[i].First_Name)
-		fmt.Println(res.User[i].Last_Name)
+	for i := 0; i < len(responseObject.User); i++ {
+		fmt.Println(responseObject.User[i].Id)
+		fmt.Println(responseObject.User[i].First_Name)
+		fmt.Println(responseObject.User[i].Last_Name)
 	}
 
 	if err != nil {
