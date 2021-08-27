@@ -17,12 +17,12 @@ import (
 func TestFeatures(t *testing.T) {
 	s := gobdd.NewSuite(t, gobdd.WithBeforeScenario(func(ctx context.Context) {
 	}))
-	s.AddStep(`Call the user api`, call_api)
+	s.AddStep(`Call the user api`, callapi)
 	s.AddStep(`Validate the response body`, validate_response)
 	s.Run()
 }
 
-func call_api(t gobdd.TestingT, ctx context.Context) context.Context {
+func callapi(t gobdd.TestingT, ctx context.Context) context.Context {
 	response, err := http.Get("https://reqres.in/api/users")
 	if err != nil {
 		fmt.Print(err.Error())
